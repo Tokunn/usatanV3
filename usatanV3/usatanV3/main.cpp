@@ -9,6 +9,10 @@
 #include "error_check.h"
 #include "KinectApp.cpp"
 
+#include <math.h>
+
+#define PI 3.141592
+
 
 void draw_depth(std::vector<UINT16> *p_depth, int height, int width) {
 	if (p_depth != nullptr) {
@@ -38,38 +42,33 @@ void draw_2ddepth(std::vector<UINT16> *p_depth, int height, int width) {
 }
 
 void draw_2ddepth_worldaxis(std::vector<UINT16> *p_depth, int height, int width) {
+	// 2次元距離情報を抽出
 	std::vector<UINT16> depth2dBuffer(width, 0);
 	for (int i = 0; i < width; ++i) {
 		depth2dBuffer[i] = (*p_depth)[width*int(height / 2) + i];
 	}
-	cv::Mat depth2dImage(810, width, CV_8UC1, cv::Scalar(0));
+
+	// パースを考慮せずに上面図化
+	/*cv::Mat depth2dImage(810, width, CV_8UC1, cv::Scalar(0));
 	for (int i = 0; i < width; ++i) {
 		depth2dImage.data[i + (depth2dBuffer[i]/10 * width)] = 255;
 	}
+	cv::imshow("2D Depth", depth2dImage);*/
 
-	//cv::Mat depth2dWorldAxisImage(width, 800, CV_8UC1, cv::Scalar(0));
-	cv::Mat depth2dWorldAxisImage(900, 1600, CV_8UC1, cv::Scalar(0));
+	// 逆透視投影変換をして上面図化
+#define DEPTH2DWORLD_WIDTH 800 
+#define DEPTH2DWORLD_HEIGHT 450 
+#define KINECT_FOV_HORI 70
+	// TODO 縦横比が気持ち悪い
+	// TODO マジックナンバーが多い
+	cv::Mat depth2dWorldAxisImage(DEPTH2DWORLD_HEIGHT, DEPTH2DWORLD_WIDTH, CV_8UC1, cv::Scalar(0));
 	for (int i = 0; i < width; ++i) {
-		double ratio = (double)i / (double)256 - 1;
-		double max_x = depth2dBuffer[i] / 10 * 2.75;
-		INT16 worldX = ratio * max_x * 0.3 + 800;
-		//INT16 i_tmp = 512, z_tmp = 50;
-		//worldX = (i_tmp - 256) / 256 * z_tmp * 2.75 * 0.3 + 800;
-		//worldX = (i - 256) * 3 + 800;
-		//worldX = (i - 256) / 256 * depth2dImage.data[i] * 2.75 + 800;
-		depth2dWorldAxisImage.data[worldX + (depth2dBuffer[i] / 10 * 1600)] = 255;
+		double projection_ratio = (double)i / (double)(width/2) - 1;
+		double max_x = depth2dBuffer[i] / 10  * tan(PI/180*KINECT_FOV_HORI);
+		INT16 worldX = projection_ratio * max_x * 0.15 + DEPTH2DWORLD_WIDTH/2;
+		depth2dWorldAxisImage.data[worldX + (int)(depth2dBuffer[i] / 10 * 0.5) * DEPTH2DWORLD_WIDTH] = 255;
 	}
 	cv::imshow("2D Depth World Axis", depth2dWorldAxisImage);
-
-	/*for (int i = 0; i < width; ++i) {
-		for (int j = 0; j < 800; ++j) {
-			INT16 projectionX = 256 * 8000 / 2.75*(i - 256) / j * 256 + 256;
-			// INT16 projectionX = i;
-			INT16 projectionZ = j;
-			depth2dWorldAxisImage.data[i*800 + j]
-				= depth2dImage.data[projectionX*800+projectionZ];
-		}
-	}*/
 }
 
 void main() {
@@ -84,7 +83,7 @@ void main() {
 
 			p_depth = kinect.get_depth();
 			draw_depth(p_depth, kinect.depthHeight, kinect.depthWidth);
-			draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
+			//draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
 			draw_2ddepth_worldaxis(p_depth, kinect.depthHeight, kinect.depthWidth);
 
 			auto key = cv::waitKey(10);
