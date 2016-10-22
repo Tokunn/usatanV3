@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <Kinect.h>
+//#include <Kinect.h>
 #include <opencv2\opencv.hpp>
 
 #include <atlbase.h>
@@ -89,10 +89,16 @@ void main() {
 		while (1) {
 			kinect.update();
 
+			// フルのDepthのポインタを取得
 			p_depth = kinect.get_depth();
-			draw_depth(p_depth, kinect.depthHeight, kinect.depthWidth);
-			//draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
-			draw_2ddepth_worldaxis(p_depth, kinect.depthHeight, kinect.depthWidth);
+
+			// Depthを表示
+			kinect.draw();
+			/*draw_depth(p_depth, kinect.depthHeight, kinect.depthWidth);
+
+			// 2dMapを表示
+			draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
+			draw_2ddepth_worldaxis(p_depth, kinect.depthHeight, kinect.depthWidth);*/
 
 			auto key = cv::waitKey(10);
 			if (key == 27) {

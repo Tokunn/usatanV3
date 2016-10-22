@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CreateRTKinectMap.cpp" />
     <ClCompile Include="KinectApp.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

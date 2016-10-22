@@ -105,9 +105,10 @@ public:
 		}
 
 
-		// cv::imshow(DepthWindowName, depthImage);
+		cv::imshow(DepthWindowName, depthImage);
 
-		// Depthデータの中心を上面図にする
+		// TODO ここでやっちゃだめじゃないか？
+		/*// Depthデータの中心を上面図にする
 		std::vector<UINT16> depth2dBuffer(depthWidth, 0);
 		for (int i = 0; i < depthWidth; ++i) {
 			depth2dBuffer[i] = depthBuffer[depthWidth*int(depthHeight / 2) + i];
@@ -116,7 +117,7 @@ public:
 		for (int i = 0; i < depthWidth; ++i) {
 			depth2dImage.data[(i * 800) + depth2dBuffer[i] / 10] = 255;
 		}
-		cv::imshow("2D Depth", depth2dImage);
+		cv::imshow("2D Depth", depth2dImage);*/
 
 	}
 
