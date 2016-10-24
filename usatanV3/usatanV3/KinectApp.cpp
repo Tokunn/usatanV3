@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #include <Kinect.h>
 #include <opencv2\opencv.hpp>
@@ -7,6 +8,8 @@
 #include <atlbase.h>
 
 #include "error_check.h"
+
+//#include "DepthMap.h"
 
 class KinectApp
 {
@@ -17,6 +20,8 @@ public:
 	CComPtr<IKinectSensor> kinect = nullptr;
 
 	CComPtr<IDepthFrameReader> depthFrameReader = nullptr;
+
+	CComPtr<ICoordinateMapper> mapper = nullptr;
 
 	// 表示部分
 	int depthWidth;
@@ -67,6 +72,9 @@ public:
 		// バッファーを作成する
 		depthBuffer.resize(depthWidth * depthHeight);
 
+		// self
+		ERROR_CHECK(kinect->get_CoordinateMapper(&mapper));
+
 	}
 
 	// データの更新処理
@@ -106,19 +114,26 @@ public:
 
 
 		cv::imshow(DepthWindowName, depthImage);
+	}
 
-		// TODO ここでやっちゃだめじゃないか？
-		/*// Depthデータの中心を上面図にする
+	void draw2dMap() {
+		// 2次元距離情報を抽出
 		std::vector<UINT16> depth2dBuffer(depthWidth, 0);
 		for (int i = 0; i < depthWidth; ++i) {
 			depth2dBuffer[i] = depthBuffer[depthWidth*int(depthHeight / 2) + i];
 		}
-		cv::Mat depth2dImage(depthWidth, 800, CV_8UC1, cv::Scalar(0));
-		for (int i = 0; i < depthWidth; ++i) {
-			depth2dImage.data[(i * 800) + depth2dBuffer[i] / 10] = 255;
-		}
-		cv::imshow("2D Depth", depth2dImage);*/
 
+		cv::Mat depth2dWorldAxisImage(1000, 1000, CV_8UC1, cv::Scalar(0));
+		for (int x = 0; x < depthWidth; ++x) {
+			DepthSpacePoint depthSpacePoint = { static_cast<float>(x), static_cast<float>(depthHeight / 2) };
+			UINT16 depth = depth2dBuffer[x];
+			CameraSpacePoint cameraSpacePoint = { 0.0f, 0.0f, 0.0f };
+			mapper->MapDepthPointToCameraSpace(depthSpacePoint, depth, &cameraSpacePoint);
+			std::cout << cameraSpacePoint.X << "\t" << cameraSpacePoint.Z << "\n" << std::endl;
+			//depth2dWorldAxisImage.data[(int)(500+500/2*1000)] = 255;
+			depth2dWorldAxisImage.data[(int)(cameraSpacePoint.X*100+500) + (int)(cameraSpacePoint.Z*100 * 1000)] = 255;
+		}
+		cv::imshow("Kinect2DMap", depth2dWorldAxisImage);
 	}
 
 	std::vector<UINT16> *get_depth() {

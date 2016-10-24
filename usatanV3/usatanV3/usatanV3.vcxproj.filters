@@ -21,7 +21,10 @@
     <ClCompile Include="KinectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreateRTKinectMap.cpp">
+    <ClCompile Include="DepthMap.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

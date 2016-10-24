@@ -41,7 +41,8 @@ void draw_2ddepth(std::vector<UINT16> *p_depth, int height, int width) {
 	cv::imshow("2D Depth", depth2dImage);
 }
 
-void draw_2ddepth_worldaxis_parce(std::vector<UINT16> *p_depth, int height, int width) {
+void draw_2ddepth_worldaxis_parce(std::vector<UINT16> *p_depth, int height, int width)
+{
 	// 2次元距離情報を抽出
 	std::vector<UINT16> depth2dBuffer(width, 0);
 	for (int i = 0; i < width; ++i) {
@@ -74,10 +75,37 @@ void draw_2ddepth_worldaxis(std::vector<UINT16> *p_depth, int height, int width)
 		double max_x = (depth2dBuffer[i] / 10) * tan(PI/180*KINECT_FOV_HORI);	// そのzにおけるx方向の最大長さ(cm単位)
 		INT16 worldX = projection_ratio * max_x;								// x方向の座標(cm単位)
 		INT16 worldXimg = worldX * 0.3 + (DEPTH2DWORLD_WIDTH / 2);				// 表示用に画像座標に変換
-		depth2dWorldAxisImage.data[worldXimg + (int)(depth2dBuffer[i] / 10 * 0.3) * DEPTH2DWORLD_WIDTH] = 255;
+		depth2dWorldAxisImage.data[worldXimg + (int)(depth2dBuffer[i] / 10 * 1) * DEPTH2DWORLD_WIDTH] = 255;
 	}
 	cv::imshow("2D Depth World Axis", depth2dWorldAxisImage);
 }
+/*void draw_2ddepth_kinectaxis(std::vector<UINT16> *p_depth, int height, int width) {
+	// 2次元距離情報を抽出
+	std::vector<UINT16> depth2dBuffer(width, 0);
+	for (int i = 0; i < width; ++i) {
+		depth2dBuffer[i] = (*p_depth)[width*int(height / 2) + i];
+	}
+
+	// 逆透視投影変換をして上面図化
+#define DEPTH2DWORLD_WIDTH 1000
+#define DEPTH2DWORLD_HEIGHT 1000 
+#define KINECT_FOV_HORI 70
+	// TODO 縦横比が気持ち悪い
+	// TODO マジックナンバーが多い
+	cv::Mat depth2dWorldAxisImage(DEPTH2DWORLD_HEIGHT, DEPTH2DWORLD_WIDTH, CV_8UC1, cv::Scalar(0));
+	for (int x = 0; x < width; ++x) {
+		DepthSpacePoint depthSpacePoint = { static_cast<float>(x), static_cast<float>(height/2) };
+		UINT16 depth = (*p_depth)[width*int(height / 2) + x]; 
+		CameraSpacePoint cameraSpacePoint = { 0.0f, 0.0f, 0.0f };
+
+		double projection_ratio = (double)i / (double)(width/2) - 1;			// 比率
+		double max_x = (depth2dBuffer[i] / 10) * tan(PI/180*KINECT_FOV_HORI);	// そのzにおけるx方向の最大長さ(cm単位)
+		INT16 worldX = projection_ratio * max_x;								// x方向の座標(cm単位)
+		INT16 worldXimg = worldX * 0.3 + (DEPTH2DWORLD_WIDTH / 2);				// 表示用に画像座標に変換
+		depth2dWorldAxisImage.data[worldXimg + (int)(depth2dBuffer[i] / 10 * 0.7) * DEPTH2DWORLD_WIDTH] = 255;
+	}
+	cv::imshow("2D Depth Kinect Axis", depth2dWorldAxisImage);
+}*/
 
 void main() {
 	try {
@@ -94,11 +122,13 @@ void main() {
 
 			// Depthを表示
 			kinect.draw();
-			/*draw_depth(p_depth, kinect.depthHeight, kinect.depthWidth);
+			//kinect.draw2dMap();
+			//draw_depth(p_depth, kinect.depthHeight, kinect.depthWidth);
 
 			// 2dMapを表示
-			draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
-			draw_2ddepth_worldaxis(p_depth, kinect.depthHeight, kinect.depthWidth);*/
+			//draw_2ddepth(p_depth, kinect.depthHeight, kinect.depthWidth);
+			draw_2ddepth_worldaxis(p_depth, kinect.depthHeight, kinect.depthWidth);
+			//draw_2ddepth_kinectaxis(p_depth, kinect.depthHeight, kinect.depthWidth);
 
 			auto key = cv::waitKey(10);
 			if (key == 27) {
