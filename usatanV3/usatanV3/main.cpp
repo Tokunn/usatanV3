@@ -74,7 +74,7 @@ void draw_2ddepth_worldaxis(std::vector<UINT16> *p_depth, int height, int width)
 		double max_x = (depth2dBuffer[i] / 10) * tan(PI/180*KINECT_FOV_HORI);	// そのzにおけるx方向の最大長さ(cm単位)
 		INT16 worldX = projection_ratio * max_x;								// x方向の座標(cm単位)
 		INT16 worldXimg = worldX * 0.3 + (DEPTH2DWORLD_WIDTH / 2);				// 表示用に画像座標に変換
-		depth2dWorldAxisImage.data[worldXimg + (int)(depth2dBuffer[i] / 10 * 0.3) * DEPTH2DWORLD_WIDTH] = 255;
+		depth2dWorldAxisImage.data[worldXimg + (int)(depth2dBuffer[i] / 10 * 1) * DEPTH2DWORLD_WIDTH] = 255;
 	}
 	cv::imshow("2D Depth World Axis", depth2dWorldAxisImage);
 }
